@@ -5,7 +5,6 @@ import plotly.express as px
 st.set_page_config(layout="wide")
 st.title("Projeto BI - Visualização de Dados")
 
-# Carregando o arquivo como -->  encoding latin1
 try:
     df = pd.read_csv('dataset_contabio.csv', sep=';', encoding='latin1')
     #st.write(df.head(15))  # mostra as primeiras 15 linhas 
@@ -13,13 +12,13 @@ except Exception as e:
     st.error(f"Erro ao carregar o arquivo: {e}")
 
 if 'df' in locals():
-    # Garantindo que a coluna 'Data do Contrato ContaBio' esteja no formato datetime
+    # coluna 'Data do Contrato ContaBio' esteja no formato datetime
     try:
         df['Data do Contrato ContaBio'] = pd.to_datetime(df['Data do Contrato ContaBio'], errors='coerce')
     except Exception as e:
         st.error(f"Erro ao converter datas: {e}")
 
-    # Removendo valores inválidos após a conversão
+    # Removendo valores inválidos 
     df = df.dropna(subset=['Data do Contrato ContaBio'])
 
     # Criando os dados para os gráficos
@@ -62,6 +61,13 @@ if 'df' in locals():
     col1, col2, col3 = st.columns(3)
     # Gráfico 1: Clientes por Tipo de Empresa
     with col1:
+        empresas_saude = [
+            'Clínica Médica', 'Clínica Médica Especializada', 'Clínica Odontológica', 
+            'Clinica de Estética', 'Influencer Area da Saúde', 
+            'Clínica de Fisioterapia', 'Clínica de Psicologia', 'Laboratório de Exames Clínicos'
+        ]
+        replacements = {categoria: 'Saúde' for categoria in empresas_saude}
+        df['Tipo de Empresa'] = df['Tipo de Empresa'].replace(replacements)
         clientes_por_empresa = df.groupby('Tipo de Empresa')['ID Cliente'].count().sort_values(ascending=True)
         grafico1 = px.bar(
             clientes_por_empresa, 
@@ -74,7 +80,7 @@ if 'df' in locals():
         )
         st.plotly_chart(grafico1, use_container_width=True)
 
-    # Gráfico 2: Leads por Fonte do Lead
+    # Gráfico 2: Leads 
     with col2:
         leads = df.groupby('Fonte do Lead')['ID Cliente'].count().sort_values(ascending=True)
         grafico4 = px.bar(
